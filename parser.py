@@ -1,14 +1,15 @@
 from requests_html import HTMLSession, HTML
 
 import pytz
-from datetime import datetime
+import datetime
 import time
 import re
-from Thread import Thread
+from collections import namedtuple
 import urllib.request
 
 tz = pytz.timezone("Europe/Moscow")
 
+ThreadInfo = namedtuple('ThreadInfo', ['thread_number', 'timestamp', 'subject', 'text', 'op_files', 'link'])
 '''
 TODO:
 get text of thread, get image link,
@@ -26,61 +27,48 @@ Text, visuals (if present), thread number, date published
 
 
 '''
-def parse():
-
-    session = HTMLSession()
-
-    r = session.get("https://2ch.hk/news/index.json", headers={"accept": "application/json"})
-
-    threads = r.json().get("threads")
-
+def parse_threads(threads):
     parsed_data = []
-    pattern = r'^[\d\w]+\.[\w]+\/[.]+'
     
-    for thread in threads:
+    for thread in threads[1:]:  # offsetting one sticky thread on the top
+        thread_number = thread.get('thread_num')
+        thread_link = "2ch.hk/news/res/" + str(thread_number) + ".html"
+
+        original_poster = thread.get('posts')[0]
+        op_files = original_poster.get("files")
+        subject = original_poster.get("subject")
+
+        op_text = original_poster.get('comment')
+        html_text = HTML(html=op_text)
+        absolute_links = html_text.find('a')        
         
-        text = thread.get("posts")[0].get("comment")
-        sources = HTML(html = text).absolute_links
-        text = HTML(html = text)
-        text2 = text.text
-        for a in text.find("a"):
-            href = a.attrs["href"]
-            # print(href)
-     
-            text2 = text2.replace(href, ("[" + href + "](" + href + ")"))
+        # TODO: think what to do about this mess.
+        for a in absolute_links:
+            href = a.attrs["href"]     
+            op_text = op_text.replace(href, ("[" + href + "](" + href + ")"))
 
 
-        # print(text2)
-        text = text2
-        visual = thread.get("posts")[0].get("files")
+        timestamp = datetime.datetime.fromtimestamp(original_poster.get("timestamp"))
 
-        subject = thread.get("posts")[0].get("subject")
+        op_files = [op_file.get('path') for op_file in op_files] if op_files else None
 
-        thread_num = thread.get("thread_num")
-
-        timestamp = thread.get("posts")[0].get("timestamp")
-        timestamp = int(time.mktime(datetime.fromtimestamp(timestamp).astimezone(tz).timetuple()))
-        # print(subject)
-        
-        link = "2ch.hk/news/res/" + str(thread_num) + ".html"
-
-        if len(visual) != 0:
-            visual =  visual[0].get("path")
-        else:
-            visual = ""
-
-        if timestamp > (int(time.mktime(datetime.now().astimezone(tz).timetuple()))-3600):
-            parsed_data.append(Thread(thread_num,timestamp, subject, text, sources, visual, link))
-            print(link)
+        if timestamp > datetime.datetime.now() - datetime.timedelta(hours=1):
+            parsed_data.append(ThreadInfo(
+                                thread_number,
+                                timestamp, 
+                                subject, 
+                                op_text, 
+                                op_files, 
+                                thread_link))
+            print(thread_link)
 
     return parsed_data
-
-
-
-
-
     
 
 if __name__ == "__main__":
-    parse()
+    session = HTMLSession()
+    r = session.get("https://2ch.hk/news/index.json", headers={"accept": "application/json"})
+    threads = r.json().get("threads")
+    
+    parse_threads(threads)
 
