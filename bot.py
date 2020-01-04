@@ -28,6 +28,10 @@ def main():
         }
     }
 
+    CHAT_ID = "@twochnews"
+    IMAGE_EXTENSIONS = [".jpg", ".png"]
+    ANIMATION_EXTENSIONS = [".gif"]
+    VIDEO_EXTENSIONS = [".webm", ".mp4"]
 
     def start(update,context):
         
@@ -56,37 +60,42 @@ def main():
 
             urllib.request.urlretrieve("https://2ch.hk" + thread.visual, 'buffer' + ext)
             
-            if ext == ".jpg" or ext == ".png": 
+            if ext in IMAGE_EXTENSIONS: 
+
                 if len(text[0])>1024:
-                    updater.bot.send_photo(chat_id = "@twochnews", photo = open('buffer' + ext, 'rb'))
+                    updater.bot.send_photo(chat_id = CHAT_ID, photo = open('buffer' + ext, 'rb'))
                     for chunk in text:
-                        updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)
-
-
+                        updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)
                 else:
-                    updater.bot.send_photo(chat_id = "@twochnews", photo = open('buffer' + ext, 'rb'),\
+                    updater.bot.send_photo(chat_id = CHAT_ID, photo = open('buffer' + ext, 'rb'),\
                         caption = text[0], parse_mode = ParseMode.MARKDOWN)
-            elif ext == ".gif":
+            
+            elif ext in ANIMATION_EXTENSIONS:
+
                 if len(text[0])>1024:
-                    updater.bot.send_animation(chat_id = "@twochnews", animation = open('buffer' + ext, 'rb'))
+                    updater.bot.send_animation(chat_id = CHAT_ID, animation = open('buffer' + ext, 'rb'))
                     for chunk in text:
-                        updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)
+                        updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)
                 else:
-                    updater.bot.send_animation(chat_id = "@twochnews",\
+                    updater.bot.send_animation(chat_id = CHAT_ID,\
                          animation = open('buffer' + ext, 'rb'),\
                               caption = text[0], parse_mode = ParseMode.MARKDOWN)
-            elif ext == ".webm" or ext == ".mp4":
-                if len(text[0])>1024:
-                    updater.bot.send_video(chat_id = "@twochnews", video = open('buffer' + ext, 'rb'))
-                    for chunk in text:
-                        updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)                
-                else:
-                    updater.bot.send_video(chat_id = "@twochnews", video = open('buffer' + ext, 'rb'), caption = text[0], parse_mode = ParseMode.MARKDOWN)
-            else:
-                for chunk in text:
-                    updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)
             
-            os.remove("buffer" + ext )
+            elif ext in VIDEO_EXTENSIONS:
+                if len(text[0])>1024:
+                    updater.bot.send_video(chat_id = CHAT_ID, video = open('buffer' + ext, 'rb'))
+                    for chunk in text:
+                        updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)                
+                else:
+                    updater.bot.send_video(chat_id = CHAT_ID, video = open('buffer' + ext, 'rb'), \
+                        caption = text[0], parse_mode = ParseMode.MARKDOWN)
+            
+            else:
+            
+                for chunk in text:
+                    updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)
+            
+            os.remove("buffer" + ext)
             
     updater = Updater(TOKEN, use_context=True, request_kwargs=REQUEST_KWARGS)
 
