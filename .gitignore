@@ -2,3 +2,4 @@
 /token
 /files
 __pycache__/
+deploy.sh
