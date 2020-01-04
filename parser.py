@@ -1,31 +1,15 @@
 from requests_html import HTMLSession, HTML
 
 import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import re
-from Thread import Thread
+from collections import namedtuple
 import urllib.request
 
 tz = pytz.timezone("Europe/Moscow")
+ThreadInfo = namedtuple('ThreadInfo', ['thread_number','timestamp','subject','text','visual','thread_link'])
 
-'''
-TODO:
-get text of thread, get image link,
-check if the thread creation time is within given time,
-
-JSON Structure:
-
-posts: list of posts
-each post : comment (text of post), date, files (image/video attached), subject
-thread_num
-
-What is needed for a thread object:
-
-Text, visuals (if present), thread number, date published
-
-
-'''
 def parse():
 
     session = HTMLSession()
@@ -35,51 +19,41 @@ def parse():
     threads = r.json().get("threads")
 
     parsed_data = []
-    pattern = r'^[\d\w]+\.[\w]+\/[.]+'
     
-    for thread in threads:
-        
-        text = thread.get("posts")[0].get("comment")
-        sources = HTML(html = text).absolute_links
-        text = HTML(html = text)
-        text2 = text.text
-        for a in text.find("a"):
-            href = a.attrs["href"]
-            # print(href)
-     
-            text2 = text2.replace(href, ("[" + href + "](" + href + ")"))
-
-
-        # print(text2)
-        text = text2
-        visual = thread.get("posts")[0].get("files")
-
-        subject = thread.get("posts")[0].get("subject")
-
-        thread_num = thread.get("thread_num")
+    for thread in threads[1::]:
 
         timestamp = thread.get("posts")[0].get("timestamp")
-        timestamp = int(time.mktime(datetime.fromtimestamp(timestamp).astimezone(tz).timetuple()))
-        # print(subject)
-        
-        link = "2ch.hk/news/res/" + str(thread_num) + ".html"
+        timestamp = datetime.fromtimestamp(timestamp).astimezone(tz)
 
-        if len(visual) != 0:
-            visual =  visual[0].get("path")
-        else:
-            visual = ""
+        if timestamp > datetime.now().astimezone(tz) - timedelta(hours=1):
+            
+            thread_number = thread.get("thread_num")
+            
+            subject = thread.get("posts")[0].get("subject")
 
-        if timestamp > (int(time.mktime(datetime.now().astimezone(tz).timetuple()))-3600):
-            parsed_data.append(Thread(thread_num,timestamp, subject, text, sources, visual, link))
-            print(link)
+            text = thread.get("posts")[0].get("comment")
+            text = HTML(html = text)
+            links = text.find("a")
+            text = text.text
+
+            for link in links:
+                href = link.attrs["href"]
+                text = text.replace(href, ("[" + href + "](" + href + ")"))
+
+            visual = thread.get("posts")[0].get("files")
+
+            if len(visual) != 0:
+                visual =  visual[0].get("path")
+            else:
+                visual = ""
+                
+            thread_link = "2ch.hk/news/res/" + str(thread_number) + ".html"
+            
+            parsed_data.append(ThreadInfo(thread_number, timestamp, subject, text, visual, thread_link))
+            
 
     return parsed_data
-
-
-
-
-
-    
+   
 
 if __name__ == "__main__":
     parse()

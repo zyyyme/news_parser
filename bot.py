@@ -19,7 +19,6 @@ def main():
 
     token_file.close()
 
-
     REQUEST_KWARGS={
         'proxy_url': 'socks5://orbtl.s5.opennetwork.cc:999',
         # Optional, if you need authentication:
@@ -31,16 +30,20 @@ def main():
 
 
     def start(update,context):
+        
         update.message.reply_text("fuck off")
         
 
     def fetch_messages(update,context):
-        update.message.reply_text("Fetching")
-        context.job_queue.run_repeating(send_messages, 3600, \
-           #first=datetime.now().replace(second=0, microsecond=0, minute=0) + timedelta(hours=1), context=update)
-           first = datetime.now(), context = update)
+        if update.message.from_user.username == "zyyme":
+            update.message.reply_text("Fetching")
+            context.job_queue.run_repeating(parse_send_messages, 3600, \
+            #first=datetime.now().replace(second=0, microsecond=0, minute=0) + timedelta(hours=1), context=update)
+            first = datetime.now(), context = update)
+        else:
+            update.message.reply_text("fuck off")
 
-    def send_messages(context):
+    def parse_send_messages(context):
         threads = parse()
 
         for thread in threads:
@@ -49,39 +52,42 @@ def main():
 
             text = "*" + thread.subject + "* \n \n" + thread.text + "\n"
             text = [text[i:i+4096] for i in range(0,len(text), 4096)]
-            text[-1] += "\n\n[**ТРЕД**](" + thread.link + ")"
+            text[-1] += "\n[**ТРЕД**](" + thread.thread_link + ")"
 
-            urllib.request.urlretrieve("https://2ch.hk" + thread.visual, 'buffer' + thread.visual[thread.visual.index(".")::])
-            print('buffer' + thread.visual[thread.visual.index(".")::])
+            urllib.request.urlretrieve("https://2ch.hk" + thread.visual, 'buffer' + ext)
+            
             if ext == ".jpg" or ext == ".png": 
                 if len(text[0])>1024:
-                    updater.bot.send_photo(chat_id = "@twochnews", photo = open('buffer' + thread.visual[thread.visual.index(".")::], 'rb'))
+                    updater.bot.send_photo(chat_id = "@twochnews", photo = open('buffer' + ext, 'rb'))
                     for chunk in text:
                         updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)
 
 
                 else:
-                    updater.bot.send_photo(chat_id = "@twochnews", photo = open('buffer' + thread.visual[thread.visual.index(".")::], 'rb'),\
+                    updater.bot.send_photo(chat_id = "@twochnews", photo = open('buffer' + ext, 'rb'),\
                         caption = text[0], parse_mode = ParseMode.MARKDOWN)
             elif ext == ".gif":
                 if len(text[0])>1024:
-                    updater.bot.send_animation(chat_id = "@twochnews", animation = open('buffer' + thread.visual[thread.visual.index(".")::], 'rb'))
+                    updater.bot.send_animation(chat_id = "@twochnews", animation = open('buffer' + ext, 'rb'))
                     for chunk in text:
                         updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)
                 else:
-                    updater.bot.send_animation(chat_id = "@twochnews", animation = open('buffer' + thread.visual[thread.visual.index(".")::], 'rb'), caption = text[0], parse_mode = ParseMode.MARKDOWN)
+                    updater.bot.send_animation(chat_id = "@twochnews",\
+                         animation = open('buffer' + ext, 'rb'),\
+                              caption = text[0], parse_mode = ParseMode.MARKDOWN)
             elif ext == ".webm" or ext == ".mp4":
                 if len(text[0])>1024:
-                    updater.bot.send_video(chat_id = "@twochnews", video = open('buffer' + thread.visual[thread.visual.index(".")::], 'rb'))
+                    updater.bot.send_video(chat_id = "@twochnews", video = open('buffer' + ext, 'rb'))
                     for chunk in text:
                         updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)                
                 else:
-                    updater.bot.send_video(chat_id = "@twochnews", video = open('buffer' + thread.visual[thread.visual.index(".")::], 'rb'), caption = text[0], parse_mode = ParseMode.MARKDOWN)
+                    updater.bot.send_video(chat_id = "@twochnews", video = open('buffer' + ext, 'rb'), caption = text[0], parse_mode = ParseMode.MARKDOWN)
             else:
                 for chunk in text:
                     updater.bot.send_message(chat_id = "@twochnews", text = chunk, parse_mode = ParseMode.MARKDOWN)
-            os.remove("buffer" + thread.visual[thread.visual.index(".")::] )
-            break
+            
+            os.remove("buffer" + ext )
+            
     updater = Updater(TOKEN, use_context=True, request_kwargs=REQUEST_KWARGS)
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
