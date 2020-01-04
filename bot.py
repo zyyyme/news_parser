@@ -1,10 +1,12 @@
+import os
+import sys
+import logging
+from datetime import datetime
+
+import urllib
 from telegram.ext import Updater, CommandHandler, JobQueue
 from telegram import InputMediaAnimation, InputMediaPhoto, InputMediaVideo, ParseMode
-import logging
-import urllib
-from datetime import datetime
 from parser import parse_threads
-import os
 
 
 def _retrieve_op_files(files):
@@ -67,6 +69,7 @@ def send_messages(context):
         text = f"*{thread.subject}*\n\n" \
                f"{thread.text}\n" \
                f"[ТРЕД]({thread.link})"
+        print('Text: ', text)
         
         op_files = _retrieve_op_files(thread.op_files)
         _send_op_files_and_text(op_files, text)
@@ -84,14 +87,17 @@ if __name__ == "__main__":
 
     with open('token', 'r') as token_file:
         TOKEN = str(token_file.read().strip())
-
-    REQUEST_KWARGS={
-        'proxy_url': 'socks5://orbtl.s5.opennetwork.cc:999',
-        'urllib3_proxy_kwargs': {
-            'username': '1305759',
-            'password': 'ZJ0mPA1A',
+    
+    if len(sys.argv) > 1 and sys.argv[1] == 'localhost':
+        REQUEST_KWARGS={
+            'proxy_url': 'socks5://orbtl.s5.opennetwork.cc:999',
+            'urllib3_proxy_kwargs': {
+                'username': '1305759',
+                'password': 'ZJ0mPA1A',
+            }
         }
-    }
+    else:
+        REQUEST_KWARGS = None
 
     CHAT_ID = '@asdfasdfasdfsadfasdf'
     IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png']
