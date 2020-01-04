@@ -7,4 +7,3 @@ Made this thing one evening for sake of getting news without having to go anywhe
 * Python
 * requests
 * python-telegram-bot
-* redis (?)
