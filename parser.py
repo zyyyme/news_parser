@@ -10,6 +10,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 
 tz = pytz.timezone("Europe/Moscow")
+ThreadInfo = namedtuple('ThreadInfo', ['thread_number','timestamp','subject','text','visual','thread_link'])
 
 ThreadInfo = namedtuple('ThreadInfo', ['thread_number', 'timestamp', 'subject', 'text', 'op_files', 'link'])
 '''
