@@ -42,8 +42,8 @@ def main():
         if update.message.from_user.username == "zyyme":
             update.message.reply_text("Fetching")
             context.job_queue.run_repeating(parse_send_messages, 3600, \
-            #first=datetime.now().replace(second=0, microsecond=0, minute=0) + timedelta(hours=1), context=update)
-            first = datetime.now(), context = update)
+            first=datetime.now().replace(second=0, microsecond=0, minute=0) + timedelta(hours=1), context=update)
+            #first = datetime.now(), context = update)
         else:
             update.message.reply_text("fuck off")
 
