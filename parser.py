@@ -1,11 +1,13 @@
 from requests_html import HTMLSession, HTML
 
-import pytz
 import datetime
 import time
 import re
 from collections import namedtuple
+
+import pytz
 import urllib.request
+from bs4 import BeautifulSoup
 
 tz = pytz.timezone("Europe/Moscow")
 
@@ -27,7 +29,12 @@ Text, visuals (if present), thread number, date published
 
 
 '''
-def parse_threads(threads):
+def parse_threads(threads=None):
+    if not threads:
+        session = HTMLSession()
+        r = session.get("https://2ch.hk/news/index.json", headers={"accept": "application/json"})
+        threads = r.json().get("threads")
+
     parsed_data = []
     
     for thread in threads[1:]:  # offsetting one sticky thread on the top
@@ -38,15 +45,9 @@ def parse_threads(threads):
         op_files = original_poster.get("files")
         subject = original_poster.get("subject")
 
-        op_text = original_poster.get('comment')
-        html_text = HTML(html=op_text)
-        absolute_links = html_text.find('a')        
-        
-        # TODO: think what to do about this mess.
-        for a in absolute_links:
-            href = a.attrs["href"]     
-            op_text = op_text.replace(href, ("[" + href + "](" + href + ")"))
-
+        op_text = original_poster.get('comment').replace('<br>', '\n') # changing 2ch <br> tags to \n to maintain new lines
+        op_text = BeautifulSoup(op_text, "lxml").text  # cleaning text of html tags
+        op_text = re.sub(r'^https?:\/\/.*[\r\n]*', '', op_text, flags=re.MULTILINE) # removing links
 
         timestamp = datetime.datetime.fromtimestamp(original_poster.get("timestamp"))
 
