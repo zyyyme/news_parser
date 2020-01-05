@@ -48,11 +48,10 @@ def __prepare_text_chunks(text):
 
 def __get_sending_method(extension):
     image_mapper = [(ext, UPDATER.bot.send_photo) for ext in IMAGE_EXTENSIONS]
-    animation_mapper = [(ext, UPDATER.bot.send_animation) for ext in IMAGE_EXTENSIONS]
-    video_mapper = [(ext, UPDATER.bot.send_video) for ext in IMAGE_EXTENSIONS]
+    animation_mapper = [(ext, UPDATER.bot.send_animation) for ext in ANIMATED_EXTENSIONS]
+    video_mapper = [(ext, UPDATER.bot.send_video) for ext in VIDEO_EXTENSIONS]
     
     extension_to_method = dict(image_mapper + animation_mapper + video_mapper)
-
     return extension_to_method.get(extension)
 
 
@@ -125,18 +124,18 @@ def send_messages(context):
 
 def fetch_messages(update, context):
     update.message.reply_text("Fetching")
-    context.job_queue.run_repeating(send_messages, 3600, first=datetime.now(), context=update)
+    context.job_queue.run_repeating(send_messages, 3600, first=datetime.now().replace(second=0, microsecond=0, minute=0) + datetime.timedelta(hours=1), context=update)
 
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
     logger = logging.getLogger(__name__)
-
+    testing = True if len(sys.argv) > 1 and sys.argv[1] == 'localhost' else False
     with open('token', 'r') as token_file:
         TOKEN = str(token_file.read().strip())
 
-    CHAT_ID = '@asdfasdfasdfsadfasdf'
+    CHAT_ID = '@zxbmaskjdfhasgdkh' if testing else '@asdfasdfasdfsadfasdf'
     IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'jfif']
     ANIMATED_EXTENSIONS = ['gif']
     VIDEO_EXTENSIONS = ['webm', 'mp4']
@@ -144,7 +143,10 @@ if __name__ == "__main__":
 
     UPDATER = Updater(TOKEN, use_context=True)
     UPDATER.dispatcher.add_handler(CommandHandler('fetch', fetch_messages, pass_job_queue=True))
-
+    
+    if testing:
+        print('===============================  TESTING  ===============================')
+    
     print('Polling!')
     
     UPDATER.start_polling()
