@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from datetime import datetime
+import datetime
 
 import urllib
 import telegram.constants
@@ -124,7 +124,7 @@ def send_messages(context):
 
 def fetch_messages(update, context):
     update.message.reply_text("Fetching")
-    context.job_queue.run_repeating(send_messages, 3600, first=datetime.now().replace(second=0, microsecond=0, minute=0) + datetime.timedelta(hours=1), context=update)
+    context.job_queue.run_repeating(send_messages, 3600, first=datetime.datetime.now().replace(second=0, microsecond=0, minute=0) + datetime.timedelta(hours=1), context=update)
 
 
 if __name__ == "__main__":
