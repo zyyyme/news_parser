@@ -135,20 +135,9 @@ if __name__ == "__main__":
 
     with open('token', 'r') as token_file:
         TOKEN = str(token_file.read().strip())
-    
-    if len(sys.argv) > 1 and sys.argv[1] == 'localhost':
-        REQUEST_KWARGS={
-            'proxy_url': 'socks5://orbtl.s5.opennetwork.cc:999',
-            'urllib3_proxy_kwargs': {
-                'username': '1305759',
-                'password': 'ZJ0mPA1A',
-            }
-        }
-    else:
-        REQUEST_KWARGS = None
 
     CHAT_ID = '@asdfasdfasdfsadfasdf'
-    IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png']
+    IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'jfif']
     ANIMATED_EXTENSIONS = ['gif']
     VIDEO_EXTENSIONS = ['webm', 'mp4']
     DEFAULT_TIMEOUT = 60
