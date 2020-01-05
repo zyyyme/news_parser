@@ -35,6 +35,8 @@ def parse():
             text = HTML(html = text)
             links = text.find("a")
             text = text.html
+            text = text.replace("<br>", "\n")
+
             text = bs4.BeautifulSoup(text, features="lxml").get_text()
 
             for link in links:
@@ -51,7 +53,8 @@ def parse():
             thread_link = "2ch.hk/news/res/" + str(thread_number) + ".html"
             
             parsed_data.append(ThreadInfo(thread_number, timestamp, subject, text, visual, thread_link))
-
+            print(text)
+        break
     return parsed_data
    
 
