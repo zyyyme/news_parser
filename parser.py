@@ -40,7 +40,7 @@ def parse_threads(threads=None):
     
     for thread in threads[1:]:  # offsetting one sticky thread on the top
         thread_number = thread.get('thread_num')
-        thread_link = "2ch.hk/news/res/" + str(thread_number) + ".html"
+        thread_link = "https://2ch.hk/news/res/" + str(thread_number) + ".html"
 
         original_poster = thread.get('posts')[0]
         op_files = original_poster.get("files")
