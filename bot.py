@@ -142,7 +142,7 @@ if __name__ == "__main__":
     VIDEO_EXTENSIONS = ['webm', 'mp4']
     DEFAULT_TIMEOUT = 60
 
-    UPDATER = Updater(TOKEN, use_context=True, request_kwargs=REQUEST_KWARGS)
+    UPDATER = Updater(TOKEN, use_context=True)
     UPDATER.dispatcher.add_handler(CommandHandler('fetch', fetch_messages, pass_job_queue=True))
 
     print('Polling!')
