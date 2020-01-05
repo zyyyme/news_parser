@@ -1,10 +1,12 @@
-from telegram.ext import Updater, CommandHandler, JobQueue
-from telegram import ParseMode
-from datetime import datetime, timedelta
-import logging
-from urllib.parse import urlparse
 import os
 import urllib
+import logging
+from urllib.parse import urlparse
+from datetime import datetime, timedelta
+
+from telegram import ParseMode
+from telegram.ext import Updater, CommandHandler, JobQueue
+
 from parser import parse
 
 
@@ -54,9 +56,8 @@ def main():
             ext = os.path.splitext(urlparse(thread.visual).path)[1]  
             print(thread.visual, ext)    
 
-            text = "*" + thread.subject + "* \n \n" + thread.text + "\n"
+            text = "[" + thread.subject + "](" + thread.thread_link + ") \n \n" + thread.text + "\n"
             text = [text[i:i+4096] for i in range(0,len(text), 4096)]
-            text[-1] += "\n[**ТРЕД**](" + thread.thread_link + ")"
 
             urllib.request.urlretrieve("https://2ch.hk" + thread.visual, 'buffer' + ext)
             

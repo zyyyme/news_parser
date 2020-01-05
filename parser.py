@@ -1,12 +1,11 @@
-from requests_html import HTMLSession, HTML
-
-import pytz
-from datetime import datetime, timedelta
 import time
-import re
+import pytz
 from collections import namedtuple
+from datetime import datetime, timedelta
+
 import urllib.request
 import bs4
+from requests_html import HTMLSession, HTML
 
 tz = pytz.timezone("Europe/Moscow")
 ThreadInfo = namedtuple('ThreadInfo', ['thread_number','timestamp','subject','text','visual','thread_link'])
