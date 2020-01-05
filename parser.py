@@ -54,7 +54,7 @@ def parse():
             
             parsed_data.append(ThreadInfo(thread_number, timestamp, subject, text, visual, thread_link))
             print(text)
-        break
+        
     return parsed_data
    
 
