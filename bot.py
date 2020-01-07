@@ -73,9 +73,9 @@ def main():
 
             if sending_method:
                 if send_as_caption:
-                    sending_method(CHAT_ID, open("buffer" + ext), caption=thread.text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
+                    sending_method(CHAT_ID, open("buffer" + ext, "rb"), caption=thread.text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
                 else:
-                    sending_method(CHAT_ID, open("buffer" + ext), timeout=DEFAULT_TIMEOUT)
+                    sending_method(CHAT_ID, open("buffer" + ext, "rb"), timeout=DEFAULT_TIMEOUT)
                     for chunk in thread.text:
                         updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
             else:
