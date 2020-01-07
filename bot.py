@@ -68,18 +68,18 @@ def main():
             if thread.files:
                 __get_media(thread.files[0], ext)
             
-            send_as_caption = True if len(text[0]) <= MAX_CAPTION_LENGTH else True
+            send_as_caption = True if len(thread.text[0]) <= MAX_CAPTION_LENGTH else True
             sending_method = __get_sending_method(ext)
 
             if sending_method:
                 if send_as_caption:
-                    sending_method(CHAT_ID, open("buffer" + ext), caption=text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
+                    sending_method(CHAT_ID, open("buffer" + ext), caption=thread.text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
                 else:
                     sending_method(CHAT_ID, open("buffer" + ext), timeout=DEFAULT_TIMEOUT)
-                    for chunk in text:
+                    for chunk in thread.text:
                         updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
             else:
-                for chunk in text:
+                for chunk in thread.text:
                     updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
 
             
