@@ -85,7 +85,7 @@ def main():
             
             os.remove("buffer" + ext)
             
-    updater = Updater(TOKEN, use_context=True, request_kwargs=REQUEST_KWARGS)
+    updater = Updater(TOKEN, use_context=True)
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CommandHandler('fetch', fetch_messages, pass_job_queue=True))
