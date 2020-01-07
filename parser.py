@@ -63,9 +63,9 @@ def parse():
                 
             thread_link = "2ch.hk/news/res/" + str(thread_number) + ".html"
 
-            text = __format_text(text, subject, thread_link) if text else "\n"
+            text = __format_text(text, thread_subject, thread_link) if text else "\n"
             
-            parsed_data.append(ThreadInfo(thread_number, timestamp, subject, text, visual, thread_link))
+            parsed_data.append(ThreadInfo(thread_number, timestamp, thread_subject, text, visual, thread_link))
             print(text)
         
     return parsed_data
