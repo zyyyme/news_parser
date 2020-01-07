@@ -11,7 +11,7 @@ from telegram.constants import MAX_MESSAGE_LENGTH
 REQUEST_URL = "https://2ch.hk/news/index.json"
 
 tz = pytz.timezone("Europe/Moscow")
-ThreadInfo = namedtuple('ThreadInfo', ['thread_number','timestamp','subject','text','visual','thread_link'])
+ThreadInfo = namedtuple('ThreadInfo', ['thread_number','timestamp','thread_subject','text','files','thread_link'])
 
 
 def __split_text_to_chunks(text):
@@ -65,7 +65,7 @@ def parse():
 
             text = __format_text(text, thread_subject, thread_link) if text else "\n"
             
-            parsed_data.append(ThreadInfo(thread_number, timestamp, thread_subject, text, visual, thread_link))
+            parsed_data.append(ThreadInfo(thread_number, timestamp, thread_subject, text, thread_files, thread_link))
             print(text)
         
     return parsed_data
