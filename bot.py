@@ -68,7 +68,7 @@ def main():
             if thread.files:
                 __get_media(thread.files[0], ext)
             
-            send_as_caption = True if len(thread.text[0]) <= MAX_CAPTION_LENGTH else True
+            send_as_caption = True if len(thread.text[0]) <= MAX_CAPTION_LENGTH else False
             sending_method = __get_sending_method(ext)
 
             if sending_method:
