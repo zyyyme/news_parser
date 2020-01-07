@@ -20,6 +20,10 @@ def __split_text_to_chunks(text):
 
 def __format_text(text, subject, thread_link):
     text = "[" + subject + "](" + thread_link + ") \n \n" + text + "\n"
+    text = text.replace("*", "\*")
+    text = text.replace("`", "\`")
+    text = text.replace("_", "\_")
+
     text = __split_text_to_chunks(text)
     return text
 
