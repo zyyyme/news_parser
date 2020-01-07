@@ -62,7 +62,7 @@ def main():
 
         for thread in threads:
 
-            ext = os.path.splitext(urlparse(thread.visual).path)[1]  
+            ext = os.path.splitext(urlparse(thread.files[0]).path)[1]  
             print(thread.files, ext)                
 
             if thread.files:
