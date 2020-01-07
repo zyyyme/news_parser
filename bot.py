@@ -46,7 +46,7 @@ def main():
 
 
     def start(update,context):
-        update.message.reply_text("")
+        update.message.reply_text("go away")
         
 
     def fetch_messages(update,context):
@@ -55,7 +55,7 @@ def main():
             context.job_queue.run_repeating(parse_send_messages, 3600, \
             first=datetime.now().replace(second=0, microsecond=0, minute=0) + timedelta(hours=1), context=update)
         else:
-            update.message.reply_text("")
+            update.message.reply_text("go away")
 
     def parse_send_messages(context):
         threads = parse()
