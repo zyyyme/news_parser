@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from datetime import datetime, timedelta
 
 from telegram import ParseMode
+from telegram.constants import MAX_CAPTION_LENGTH, MAX_MESSAGE_LENGTH
 from telegram.ext import Updater, CommandHandler, JobQueue
 
 from parser import parse
@@ -21,23 +22,31 @@ def main():
 
     token_file.close()
 
-    REQUEST_KWARGS={
-        'proxy_url': 'socks5://orbtl.s5.opennetwork.cc:999',
-        # Optional, if you need authentication:
-        'urllib3_proxy_kwargs': {
-            'username': '1305759',
-            'password': 'ZJ0mPA1A',
-        }
-    }
-
     CHAT_ID = "@twochnews"
+    DEFAULT_TIMEOUT = 60
+    # TODO: convert webm to mp4
     IMAGE_EXTENSIONS = [".jpg", ".png"]
     ANIMATION_EXTENSIONS = [".gif"]
     VIDEO_EXTENSIONS = [".webm", ".mp4"]
 
+
+    def __get_media(link, extension):
+        urllib.request.urlretrieve("https://2ch.hk" + link, 'buffer' + extension)
+
+    
+    def __get_sending_method(ext):
+        if ext in IMAGE_EXTENSIONS:
+            return updater.bot.send_photo
+        elif ext in ANIMATION_EXTENSIONS:
+            return updater.bot.send_animation
+        elif ext in VIDEO_EXTENSIONS:
+            return updater.bot.send_video
+        else:
+            return None
+
+
     def start(update,context):
-        
-        update.message.reply_text("fuck off")
+        update.message.reply_text("")
         
 
     def fetch_messages(update,context):
@@ -45,56 +54,34 @@ def main():
             update.message.reply_text("Fetching")
             context.job_queue.run_repeating(parse_send_messages, 3600, \
             first=datetime.now().replace(second=0, microsecond=0, minute=0) + timedelta(hours=1), context=update)
-            #first = datetime.now(), context = update)
         else:
-            update.message.reply_text("fuck off")
+            update.message.reply_text("")
 
     def parse_send_messages(context):
         threads = parse()
 
         for thread in threads:
+
             ext = os.path.splitext(urlparse(thread.visual).path)[1]  
-            print(thread.visual, ext)    
+            print(thread.files, ext)                
 
-            text = "[" + thread.subject + "](" + thread.thread_link + ") \n \n" + thread.text + "\n"
-            text = [text[i:i+4096] for i in range(0,len(text), 4096)]
-
-            urllib.request.urlretrieve("https://2ch.hk" + thread.visual, 'buffer' + ext)
+            if thread.files:
+                __get_media(thread.files[0], ext)
             
-            if ext in IMAGE_EXTENSIONS: 
+            send_as_caption = True if len(text[0]) <= MAX_CAPTION_LENGTH else True
+            sending_method = __get_sending_method(ext)
 
-                if len(text[0])>1024:
-                    updater.bot.send_photo(chat_id = CHAT_ID, photo = open('buffer' + ext, 'rb'))
-                    for chunk in text:
-                        updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)
+            if sending_method:
+                if send_as_caption:
+                    sending_method(CHAT_ID, open("buffer" + ext), caption=text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
                 else:
-                    updater.bot.send_photo(chat_id = CHAT_ID, photo = open('buffer' + ext, 'rb'),\
-                        caption = text[0], parse_mode = ParseMode.MARKDOWN)
-            
-            elif ext in ANIMATION_EXTENSIONS:
-
-                if len(text[0])>1024:
-                    updater.bot.send_animation(chat_id = CHAT_ID, animation = open('buffer' + ext, 'rb'))
+                    sending_method(CHAT_ID, open("buffer" + ext), timeout=DEFAULT_TIMEOUT)
                     for chunk in text:
-                        updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)
-                else:
-                    updater.bot.send_animation(chat_id = CHAT_ID,\
-                         animation = open('buffer' + ext, 'rb'),\
-                              caption = text[0], parse_mode = ParseMode.MARKDOWN)
-            
-            elif ext in VIDEO_EXTENSIONS:
-                if len(text[0])>1024:
-                    updater.bot.send_video(chat_id = CHAT_ID, video = open('buffer' + ext, 'rb'))
-                    for chunk in text:
-                        updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)                
-                else:
-                    updater.bot.send_video(chat_id = CHAT_ID, video = open('buffer' + ext, 'rb'), \
-                        caption = text[0], parse_mode = ParseMode.MARKDOWN)
-            
+                        updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
             else:
-            
                 for chunk in text:
-                    updater.bot.send_message(chat_id = CHAT_ID, text = chunk, parse_mode = ParseMode.MARKDOWN)
+                    updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
+
             
             os.remove("buffer" + ext)
             
