@@ -73,14 +73,14 @@ def main():
 
             if sending_method:
                 if send_as_caption:
-                    sending_method(CHAT_ID, open("buffer" + ext, "rb"), caption=thread.text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
+                    sending_method(CHAT_ID, open("buffer" + ext, "rb"), caption=thread.text[0], parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT, disable_web_page_preview=True)
                 else:
                     sending_method(CHAT_ID, open("buffer" + ext, "rb"), timeout=DEFAULT_TIMEOUT)
                     for chunk in thread.text:
-                        updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
+                        updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT, disable_web_page_preview=True)
             else:
                 for chunk in thread.text:
-                    updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT)
+                    updater.bot.send_message(CHAT_ID, chunk, parse_mode=ParseMode.MARKDOWN, timeout=DEFAULT_TIMEOUT, disable_web_page_preview=True)
 
             
             os.remove("buffer" + ext)
