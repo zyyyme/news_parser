@@ -70,7 +70,7 @@ def parse():
             text = __format_text(text, thread_subject, thread_link) 
             
             parsed_data.append(ThreadInfo(thread_number, timestamp, thread_subject, text, thread_files, thread_link))
-            print(text)
+            
         
     return parsed_data
    
