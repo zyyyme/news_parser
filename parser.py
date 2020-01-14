@@ -14,27 +14,20 @@ ThreadInfo = namedtuple('ThreadInfo', ['thread_number','timestamp','subject','te
 
 ThreadInfo = namedtuple('ThreadInfo', ['thread_number', 'timestamp', 'subject', 'text', 'op_files', 'link'])
 '''
-TODO:
-get text of thread, get image link,
-check if the thread creation time is within given time,
-
-JSON Structure:
-
-posts: list of posts
-each post : comment (text of post), date, files (image/video attached), subject
-thread_num
-
-What is needed for a thread object:
-
-Text, visuals (if present), thread number, date published
-
-
+    TODO: maybe allow bot to only show political news
+    FIXME: fix markdown breaking posts this ain't good
 '''
 def parse_threads(threads=None):
     if not threads:
         session = HTMLSession()
         r = session.get("https://2ch.hk/news/index.json", headers={"accept": "application/json"})
         threads = r.json().get("threads")
+    
+    with open('previously_parsed.list', 'r+') as f:
+        previously_parsed = f.read().split(',')
+
+        if not previously_parsed:
+            previously_parsed = []
 
     parsed_data = []
     
@@ -43,18 +36,21 @@ def parse_threads(threads=None):
         thread_link = "https://2ch.hk/news/res/" + str(thread_number) + ".html"
 
         original_poster = thread.get('posts')[0]
-        op_files = original_poster.get("files")
-        subject = original_poster.get("subject")
-
-        op_text = original_poster.get('comment').replace('<br>', '\n') # changing 2ch <br> tags to \n to maintain new lines
-        op_text = BeautifulSoup(op_text, "lxml").text  # cleaning text of html tags
-        op_text = re.sub(r'^https?:\/\/.*[\r\n]*', '', op_text, flags=re.MULTILINE) # removing links
-
         timestamp = datetime.datetime.fromtimestamp(original_poster.get("timestamp"))
 
-        op_files = [op_file.get('path') for op_file in op_files] if op_files else None
+        if thread_number not in previously_parsed and timestamp > datetime.datetime.now() - datetime.timedelta(hours=1):
+            op_files = original_poster.get("files")
+            subject = original_poster.get("subject")
+            
+            # TODO: https://pypi.org/project/html2text/
+            
+            op_text = original_poster.get('comment').replace('<br>', '\n') # changing 2ch <br> tags to \n to maintain new lines
+            op_text = BeautifulSoup(op_text, "lxml").text  # cleaning text of html tags
+            op_text = re.sub(r'^https?:\/\/.*[\r\n]*', '', op_text, flags=re.MULTILINE) # removing links
 
-        if timestamp > datetime.datetime.now() - datetime.timedelta(hours=1):
+            op_files = [op_file.get('path') for op_file in op_files] if op_files else None
+
+            previously_parsed.append(thread_number)
             parsed_data.append(ThreadInfo(
                                 thread_number,
                                 timestamp, 
@@ -62,8 +58,11 @@ def parse_threads(threads=None):
                                 op_text, 
                                 op_files, 
                                 thread_link))
-            print(thread_link)
-
+    
+    with open('previously_parsed.list', 'w+') as f:
+        f.write(','.join(previously_parsed))
+    
+    print('Parsed data: ', parsed_data)
     return parsed_data
     
 
