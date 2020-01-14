@@ -3,3 +3,5 @@
 /files
 __pycache__/
 deploy.sh
+previously_parsed.list
+
